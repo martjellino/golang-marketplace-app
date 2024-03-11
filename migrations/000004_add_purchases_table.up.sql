@@ -5,7 +5,7 @@ CREATE TABLE purchases (
   product_id INT,
   qty INT,
   total_price INT,
-  image_url VARCHAR(255),
+  image_url TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (buyer_id) REFERENCES users(user_id),
