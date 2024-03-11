@@ -5,7 +5,7 @@
 
 ## How to run
 1. Run ```go mod tidy``` to install & remote unecessary dependencies
-2. ...
+2. Run ```go run main.go``` the server will be start in port :8000 (you can test by call /healh-check)
 
 ## Migration guide
 1. Add migration script
