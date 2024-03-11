@@ -8,22 +8,27 @@
 2. ...
 
 ## Migration guide
-1. To execute migration
+1. Add migration script
+```
+migrate create -ext sql -dir migrations -seq add_user_table
+```
+
+2. To execute migration
 ```
 migrate -database "postgres://{username}:{password}@{host}:{port}/{dbname}?sslmode=disable" -path migrations up
 ```
 
-2. To rollback migration
+3. To rollback migration
 ```
 migrate -database "postgres://{username}:{password}@{host}:{port}/{dbname}?sslmode=disable" -path migrations down
 ```
 
-3. Example
+4. Example
 ```
 migrate -database "postgres://postgres:P4ssW0rd@localhost:5434/marketplace_db?sslmode=disable" -path migrations up
 ```
 
-4. If you want to add postgres docker for local development
+5. If you want to add postgres docker for local development
 ```
 docker pull postgres
 docker run --name marketplace-app -e POSTGRES_PASSWORD="P4ssW0rd" -e POSTGRES_DB="marketplace_db" -d -p 5434:5432 postgres

@@ -1,8 +1,8 @@
 CREATE TABLE users (
   user_id SERIAL PRIMARY KEY,
-  username VARCHAR(255) UNIQUE,
-  password VARCHAR(255),
-  fullname TEXT,
+  username VARCHAR(15) UNIQUE,
+  password VARCHAR(15),
+  fullname VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
