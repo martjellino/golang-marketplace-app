@@ -15,11 +15,7 @@ func StartApp() *gin.Engine {
 		userRouter.POST("/", middleware.BankAccountValidator(), controllers.CreateBankAccount)
 	}
 
-	router.GET("/health-check", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "success",
-		})
-	})
+	router.GET("/health-check", controllers.ServerCheck)
 
 	return router
 }
