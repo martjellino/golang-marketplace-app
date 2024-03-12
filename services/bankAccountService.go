@@ -2,6 +2,7 @@ package services
 
 import (
 	"database/sql"
+	"fmt"
 	bankaccount "golang-marketplace-app/models/bankAccount"
 	"log"
 	"time"
@@ -12,22 +13,22 @@ func CreateBankAccount(Request bankaccount.BankAccountRequest, db *sql.DB) (bank
 	
 	stmt, err := db.Prepare("INSERT INTO bank_accounts (user_id, bank_name, account_name, account_number) VALUES ($1, $2, $3, $4)")
 	if err != nil {
-		log.Fatal("Error preparing SQL Query:", err)
-		return bankaccount.BankAccountResponse{}, err
+			log.Println("Error preparing SQL query:", err)
+			return bankaccount.BankAccountResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(dummyUserId, Request.BankName, Request.BankAccountName, Request.BankAccountNumber)
 	if err != nil {
-			log.Fatal("Error executing insert statement:", err)
-			return bankaccount.BankAccountResponse{}, err
+			log.Println("Error executing insert statement:", err)
+			return bankaccount.BankAccountResponse{}, fmt.Errorf("error executing insert statement: %v", err)
 	}
 
 	var accountID int
 	err = db.QueryRow("SELECT LASTVAL()").Scan(&accountID)
 	if err != nil {
-			log.Fatal("Error retrieving last inserted ID:", err)
-			return bankaccount.BankAccountResponse{}, err
+			log.Println("Error retrieving last inserted ID:", err)
+			return bankaccount.BankAccountResponse{}, fmt.Errorf("error retrieving last inserted ID: %v", err)
 	}
 
 	return bankaccount.BankAccountResponse {
