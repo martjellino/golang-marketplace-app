@@ -28,6 +28,7 @@ func BankAccountValidator() gin.HandlerFunc {
 			return
 		}
 
+		context.Set("request", bankAccountRequest)
 		context.Next()
 	}
 }

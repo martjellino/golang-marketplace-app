@@ -1,40 +1,57 @@
 package controllers
 
 import (
+	"database/sql"
+	bankaccount "golang-marketplace-app/models/bankAccount"
+	"golang-marketplace-app/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CreateBankAccount(context *gin.Context) {
-	// db := database.GetDB()
+	dbInterface, ok := context.Get("db")
+	if !ok {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Database connection not found",
+		})
+		return
+	}
 
-	// userData := ctx.MustGet("userData").(jwt5.MapClaims)
-	// contentType := helpers.GetContentType(ctx)
+	db, ok := dbInterface.(*sql.DB)
+	if !ok {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to cast database connection to *sql.DB",
+		})
+		return
+	}
 
-	// Book := models.Book{}
-	// userID := uint(userData["id"].(float64))
+	requestInterface, ok := context.Get("request")
+	if !ok {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Parsed data not found in context",
+		})
+		return
+	}
 
-	// if contentType == appJSON {
-	// 	ctx.ShouldBindJSON(&Book)
-	// } else {
-	// 	ctx.ShouldBind(&Book)
-	// }
+	Request, ok := requestInterface.(bankaccount.BankAccountRequest)
+	if !ok {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to cast request connection to *bankaccount.BankAccountRequest",
+		})
+		return
+	}
 
-	// Book.UserID = userID
-	// newUUID := uuid.New()
-	// Book.UUID = newUUID.String()
-
-	// err := db.Debug().Create(&Book).Error
-	// if err != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"error":   "Bad request",
-	// 		"message": err.Error(),
-	// 	})
-	// 	return
-	// }
+	var Response, err = services.CreateBankAccount(Request, db)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to create bank account",
+		})
+		return
+	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"data": "",
+		"message": "account added successfully",
+		"data": Response,
 	})
 }
