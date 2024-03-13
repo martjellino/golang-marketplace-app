@@ -98,3 +98,15 @@ func FindBankAccountByAccountId(accountId int, db *sql.DB) (bankaccount.BankAcco
 			UpdatedAt:     updatedAt,
 	}, nil
 }
+
+func DeleteBankAccountByAccountId(accountId int, db *sql.DB) error {
+	query := "DELETE FROM bank_accounts WHERE account_id = $1"
+
+	_, err := db.Exec(query, accountId)
+	if err != nil {
+		log.Println(err)
+		return fmt.Errorf("error deleting bank account: %v", err)
+	}
+
+	return nil
+}

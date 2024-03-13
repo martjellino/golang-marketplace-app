@@ -20,6 +20,7 @@ func StartApp(db *sql.DB) *gin.Engine {
 	{
 		userRouter.POST("/", middleware.BankAccountValidator(), controllers.CreateBankAccount)
 		userRouter.PATCH("/:accountId", middleware.BankAccountValidator(), controllers.UpdateBankAccountByAccountId)
+		userRouter.DELETE("/:accountId", controllers.DeleteBankAccountByAccountId)
 	}
 
 	router.GET("/health-check", controllers.ServerCheck)
