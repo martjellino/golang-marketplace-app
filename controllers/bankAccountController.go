@@ -104,16 +104,11 @@ func UpdateBankAccountByAccountId(context *gin.Context) {
 
 	var ExistingBankAccount, findError = services.FindBankAccountByAccountId(accountId, db)
 	if findError != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to fetch bank account",
-		})
-		return
-	}
-
-	if ExistingBankAccount.AccountID == "" {
-		context.JSON(http.StatusNotFound, gin.H{
-			"message": "Bank account not found",
-		})
+		if ExistingBankAccount.AccountID == "" {
+			context.JSON(http.StatusNotFound, gin.H{"message": "Bank account not found"})
+		} else {
+			context.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch bank account"})
+		}
 		return
 	}
 
@@ -160,16 +155,11 @@ func DeleteBankAccountByAccountId(context *gin.Context) {
 
 	var ExistingBankAccount, findError = services.FindBankAccountByAccountId(accountId, db)
 	if findError != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to fetch bank account",
-		})
-		return
-	}
-
-	if ExistingBankAccount.AccountID == "" {
-		context.JSON(http.StatusNotFound, gin.H{
-			"message": "Bank account not found",
-		})
+    if ExistingBankAccount.AccountID == "" {
+			context.JSON(http.StatusNotFound, gin.H{"message": "Bank account not found"})
+		} else {
+			context.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch bank account"})
+		}
 		return
 	}
 
