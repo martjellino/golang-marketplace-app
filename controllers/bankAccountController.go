@@ -44,7 +44,8 @@ func CreateBankAccount(context *gin.Context) {
 		return
 	}
 
-	var CreatedBankAccount, err = services.CreateBankAccount(Request, db)
+	const dummyUserId = 1;
+	var CreatedBankAccount, err = services.CreateBankAccount(dummyUserId, Request, db)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to create bank account",
@@ -182,4 +183,37 @@ func DeleteBankAccountByAccountId(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{
 		"message": "account deleted successfully"})
+}
+
+// TODO - Get userId from jwt
+func GetBankAccountByUserId(context *gin.Context) {
+	dbInterface, ok := context.Get("db")
+	if !ok {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Database connection not found",
+		})
+		return
+	}
+
+	db, ok := dbInterface.(*sql.DB)
+	if !ok {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to cast database connection to *sql.DB",
+		})
+		return
+	}
+
+	const dummyUserId = 1;
+	var bankAccounts, getBankAccounsError = services.GetBankAccountsByUserId(dummyUserId, db)
+	if getBankAccounsError != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to fetch bank account",
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data":   bankAccounts ,
+	})
 }

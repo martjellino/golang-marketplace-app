@@ -9,9 +9,7 @@ import (
 	"time"
 )
 
-func CreateBankAccount(Request bankaccount.BankAccountRequest, db *sql.DB) (bankaccount.BankAccountResponse, error) {
-	const dummyUserId = 1;
-	
+func CreateBankAccount(userId int, Request bankaccount.BankAccountRequest, db *sql.DB) (bankaccount.BankAccountResponse, error) {
 	stmt, err := db.Prepare("INSERT INTO bank_accounts (user_id, bank_name, account_name, account_number) VALUES ($1, $2, $3, $4)")
 	if err != nil {
 			log.Println("Error preparing SQL query:", err)
@@ -19,7 +17,7 @@ func CreateBankAccount(Request bankaccount.BankAccountRequest, db *sql.DB) (bank
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(dummyUserId, Request.BankName, Request.BankAccountName, Request.BankAccountNumber)
+	_, err = stmt.Exec(userId, Request.BankName, Request.BankAccountName, Request.BankAccountNumber)
 	if err != nil {
 			log.Println("Error executing insert statement:", err)
 			return bankaccount.BankAccountResponse{}, fmt.Errorf("error executing insert statement: %v", err)
@@ -33,7 +31,7 @@ func CreateBankAccount(Request bankaccount.BankAccountRequest, db *sql.DB) (bank
 	}
 
 	parsedAccountId := strconv.Itoa(accountID)
-	parsedUserId := strconv.Itoa(dummyUserId)
+	parsedUserId := strconv.Itoa(userId)
 
 	return bankaccount.BankAccountResponse {
 		AccountID: parsedAccountId,
@@ -109,4 +107,40 @@ func DeleteBankAccountByAccountId(accountId int, db *sql.DB) error {
 	}
 
 	return nil
+}
+
+func GetBankAccountsByUserId(userId int, db *sql.DB) ([]bankaccount.BankAccountResponse, error) {
+    query := `
+        SELECT account_id, bank_name, account_name, account_number, created_at, updated_at 
+        FROM bank_accounts 
+        WHERE user_id = $1`
+    stmt, err := db.Prepare(query)
+    if err != nil {
+        log.Println(err)
+        return nil, fmt.Errorf("error preparing SQL query: %v", err)
+    }
+    defer stmt.Close()
+    
+    rows, err := stmt.Query(userId)
+    if err != nil {
+        log.Println("Error executing SQL query:", err)
+        return nil, fmt.Errorf("error executing SQL query: %v", err)
+    }
+    defer rows.Close()
+    
+    var accounts []bankaccount.BankAccountResponse
+    for rows.Next() {
+        var account bankaccount.BankAccountResponse
+        if err := rows.Scan(&account.AccountID, &account.BankName, &account.AccountName, &account.AccountNumber, &account.CreatedAt, &account.UpdatedAt); err != nil {
+            log.Println(err)
+            return nil, fmt.Errorf("error scanning row: %v", err)
+        }
+        accounts = append(accounts, account)
+    }
+    if err := rows.Err(); err != nil {
+        log.Println(err)
+        return nil, fmt.Errorf("error iterating over rows: %v", err)
+    }
+    
+    return accounts, nil
 }

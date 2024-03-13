@@ -19,6 +19,7 @@ func StartApp(db *sql.DB) *gin.Engine {
 	userRouter := router.Group("/v1/bank/account")
 	{
 		userRouter.POST("/", middleware.BankAccountValidator(), controllers.CreateBankAccount)
+		userRouter.GET("/", controllers.GetBankAccountByUserId)
 		userRouter.PATCH("/:accountId", middleware.BankAccountValidator(), controllers.UpdateBankAccountByAccountId)
 		userRouter.DELETE("/:accountId", controllers.DeleteBankAccountByAccountId)
 	}

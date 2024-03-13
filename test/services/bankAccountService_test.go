@@ -35,7 +35,7 @@ func TestShouldReturnBankAccountResponseAndErrorNil_whenInsertSuccess(t *testing
 		WillReturnRows(sqlmock.NewRows([]string{"account_id"}).AddRow(1))
 
 	// Call the function under test
-	response, err := services.CreateBankAccount(bankaccount.BankAccountRequest{
+	response, err := services.CreateBankAccount(mockUserId, bankaccount.BankAccountRequest{
 		BankName:          mockBankName,
 		BankAccountName:   mockAccountName,
 		BankAccountNumber: mockAccountNumber,
@@ -71,7 +71,7 @@ func TestShouldReturnBankAccountResponseAndError_whenInsertExecutionFailed(t *te
 		WillReturnError(errors.New("SQL query preparation failed"))
 
 	// Call the function under test
-	response, err := services.CreateBankAccount(bankaccount.BankAccountRequest{
+	response, err := services.CreateBankAccount(mockUserId, bankaccount.BankAccountRequest{
 		BankName:          mockBankName,
 		BankAccountName:   mockAccountName,
 		BankAccountNumber: mockAccountNumber,
@@ -101,7 +101,7 @@ func TestShouldReturnBankAccountResponseAndError_whenGetLastInsertedValueFailed(
 		WillReturnError(errors.New("mock QueryRow error"))
 
 	// Call the function under test
-	response, err := services.CreateBankAccount(bankaccount.BankAccountRequest{
+	response, err := services.CreateBankAccount(mockUserId, bankaccount.BankAccountRequest{
 		BankName:          mockBankName,
 		BankAccountName:   mockAccountName,
 		BankAccountNumber: mockAccountNumber,
