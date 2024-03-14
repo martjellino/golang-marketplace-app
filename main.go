@@ -2,6 +2,7 @@ package main
 
 import (
 	"golang-marketplace-app/router"
+	"golang-marketplace-app/database"
 )
 
 var (
@@ -9,6 +10,7 @@ var (
 )
 
 func main() {
+	database.StartDB()
 	r := router.StartApp()
 	r.Run(PORT)
 }
