@@ -1,33 +1,17 @@
 package controllers
 
 import (
-	"database/sql"
 	bankaccount "golang-marketplace-app/models/bankAccount"
 	"golang-marketplace-app/services"
+	"log"
 	"net/http"
 	"strconv"
+	jwt5 "github.com/golang-jwt/jwt/v5"
 
 	"github.com/gin-gonic/gin"
 )
 
-// TODO - Get userId from jwt
 func CreateBankAccount(context *gin.Context) {
-	dbInterface, ok := context.Get("db")
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Database connection not found",
-		})
-		return
-	}
-
-	db, ok := dbInterface.(*sql.DB)
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to cast database connection to *sql.DB",
-		})
-		return
-	}
-
 	requestInterface, ok := context.Get("request")
 	if !ok {
 		context.JSON(http.StatusInternalServerError, gin.H{
@@ -39,13 +23,24 @@ func CreateBankAccount(context *gin.Context) {
 	Request, ok := requestInterface.(bankaccount.BankAccountRequest)
 	if !ok {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to cast request connection to *bankaccount.BankAccountRequest",
+			"message": "Failed to cast request to *bankaccount.BankAccountRequest",
 		})
 		return
 	}
 
-	const dummyUserId = 1;
-	var CreatedBankAccount, err = services.CreateBankAccount(dummyUserId, Request, db)
+	JwtPayload, ok := context.Get("userData")
+	log.Println(JwtPayload)
+	if !ok {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Parsed user data not found in context",
+		})
+		return
+	}
+
+	userData := context.MustGet("userData").(jwt5.MapClaims)
+	userID := int(userData["id"].(float64))
+
+	var CreatedBankAccount, err = services.CreateBankAccount(userID, Request)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to create bank account",
@@ -60,22 +55,6 @@ func CreateBankAccount(context *gin.Context) {
 }
 
 func UpdateBankAccountByAccountId(context *gin.Context) {
-	dbInterface, ok := context.Get("db")
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Database connection not found",
-		})
-		return
-	}
-
-	db, ok := dbInterface.(*sql.DB)
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to cast database connection to *sql.DB",
-		})
-		return
-	}
-
 	requestInterface, ok := context.Get("request")
 	if !ok {
 		context.JSON(http.StatusInternalServerError, gin.H{
@@ -102,7 +81,7 @@ func UpdateBankAccountByAccountId(context *gin.Context) {
 		return
 	}
 
-	var ExistingBankAccount, findError = services.FindBankAccountByAccountId(accountId, db)
+	var ExistingBankAccount, findError = services.FindBankAccountByAccountId(accountId)
 	if findError != nil {
 		if ExistingBankAccount.AccountID == "" {
 			context.JSON(http.StatusNotFound, gin.H{"message": "Bank account not found"})
@@ -112,7 +91,7 @@ func UpdateBankAccountByAccountId(context *gin.Context) {
 		return
 	}
 
-	var UpdatedBankAccount, updateError = services.UpdateBankAccountByAccountId(accountId, Request, db)
+	var UpdatedBankAccount, updateError = services.UpdateBankAccountByAccountId(accountId, Request)
 	if updateError != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to update bank account",
@@ -127,22 +106,6 @@ func UpdateBankAccountByAccountId(context *gin.Context) {
 }
 
 func DeleteBankAccountByAccountId(context *gin.Context) {
-	dbInterface, ok := context.Get("db")
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Database connection not found",
-		})
-		return
-	}
-
-	db, ok := dbInterface.(*sql.DB)
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to cast database connection to *sql.DB",
-		})
-		return
-	}
-
 	accountIdParam := context.Param("accountId")
 	accountId, parseError := strconv.Atoi(accountIdParam)
 
@@ -153,7 +116,7 @@ func DeleteBankAccountByAccountId(context *gin.Context) {
 		return
 	}
 
-	var ExistingBankAccount, findError = services.FindBankAccountByAccountId(accountId, db)
+	var ExistingBankAccount, findError = services.FindBankAccountByAccountId(accountId)
 	if findError != nil {
     if ExistingBankAccount.AccountID == "" {
 			context.JSON(http.StatusNotFound, gin.H{"message": "Bank account not found"})
@@ -163,7 +126,7 @@ func DeleteBankAccountByAccountId(context *gin.Context) {
 		return
 	}
 
-	var deleteError = services.DeleteBankAccountByAccountId(accountId, db)
+	var deleteError = services.DeleteBankAccountByAccountId(accountId)
 	if deleteError != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to delete bank account",
@@ -175,26 +138,20 @@ func DeleteBankAccountByAccountId(context *gin.Context) {
 		"message": "account deleted successfully"})
 }
 
-// TODO - Get userId from jwt
 func GetBankAccountByUserId(context *gin.Context) {
-	dbInterface, ok := context.Get("db")
+	JwtPayload, ok := context.Get("userData")
+	log.Println(JwtPayload)
 	if !ok {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Database connection not found",
+			"message": "Parsed user data not found in context",
 		})
 		return
 	}
 
-	db, ok := dbInterface.(*sql.DB)
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to cast database connection to *sql.DB",
-		})
-		return
-	}
+	userData := context.MustGet("userData").(jwt5.MapClaims)
+	userID := int(userData["id"].(float64))
 
-	const dummyUserId = 1;
-	var bankAccounts, getBankAccounsError = services.GetBankAccountsByUserId(dummyUserId, db)
+	var bankAccounts, getBankAccounsError = services.GetBankAccountsByUserId(userID)
 	if getBankAccounsError != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to fetch bank account",

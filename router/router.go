@@ -18,10 +18,10 @@ func StartApp() *gin.Engine {
 
 	bankAccountRouter := router.Group("/v1/bank/account")
 	{
-		bankAccountRouter.POST("/", middleware.BankAccountValidator(), controllers.CreateBankAccount)
-		bankAccountRouter.GET("/", controllers.GetBankAccountByUserId)
-		bankAccountRouter.PATCH("/:accountId", middleware.BankAccountValidator(), controllers.UpdateBankAccountByAccountId)
-		bankAccountRouter.DELETE("/:accountId", controllers.DeleteBankAccountByAccountId)
+		bankAccountRouter.POST("/",  middleware.Authentication(), middleware.BankAccountValidator(), controllers.CreateBankAccount)
+		bankAccountRouter.GET("/", middleware.Authentication(), controllers.GetBankAccountByUserId)
+		bankAccountRouter.PATCH("/:accountId", middleware.Authentication(), middleware.BankAccountValidator(), controllers.UpdateBankAccountByAccountId)
+		bankAccountRouter.DELETE("/:accountId", middleware.Authentication(), controllers.DeleteBankAccountByAccountId)
 	}
 
 	router.GET("/health-check", controllers.ServerCheck)
