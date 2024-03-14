@@ -1,12 +1,14 @@
 package router
 
 import (
+	"database/sql"
 	"golang-marketplace-app/controllers"
+	middleware "golang-marketplace-app/middlewere"
 
 	"github.com/gin-gonic/gin"
 )
 
-func StartApp() *gin.Engine {
+func StartApp(db *sql.DB) *gin.Engine {
 	router := gin.Default()
 
 	userRouter := router.Group("v1/user")
@@ -14,12 +16,14 @@ func StartApp() *gin.Engine {
 		userRouter.POST("/register", controllers.UserRegister)
 		userRouter.POST("/login", controllers.UserLogin)
 	}
-
-	router.GET("/health-check", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "success",
-		})
 	})
+
+	bankAccountRouter := router.Group("/v1/bank/account")
+	{
+		bankAccountRouter.POST("/", middleware.BankAccountValidator(), controllers.CreateBankAccount)
+	}
+
+	router.GET("/health-check", controllers.ServerCheck)
 
 	return router
 }

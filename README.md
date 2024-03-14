@@ -5,7 +5,7 @@
 
 ## How to run
 1. Run ```go mod tidy``` to install & remote unecessary dependencies
-2. Run ```go run main.go``` the server will be start in port :8000 (you can test by call /healh-check)
+2. Run ```go run main.go``` the server will be start in port :8000 (you can test by call /health-check)
 
 ## Migration guide
 1. Add migration script
@@ -34,3 +34,13 @@ docker pull postgres
 docker run --name marketplace-app -e POSTGRES_PASSWORD="P4ssW0rd" -e POSTGRES_DB="marketplace_db" -d -p 5434:5432 postgres
 ```
 default username is 'postgres'
+
+## Unit Test guide
+1. To run the test (right now is in specific folder, i don't know how to run all yet XD)
+```
+go test ./test/controllers -v
+go test ./test/services -v
+...
+```
+
+i'll looking about this later (the most important, coverage)

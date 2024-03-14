@@ -1,6 +1,7 @@
 package main
 
 import (
+	"golang-marketplace-app/database"
 	"golang-marketplace-app/router"
 	"golang-marketplace-app/database"
 )
