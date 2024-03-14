@@ -11,14 +11,16 @@ import (
 func StartApp(db *sql.DB) *gin.Engine {
 	router := gin.Default()
 
-	router.Use(func(c *gin.Context) {
-		c.Set("db", db)
-		c.Next()
+	userRouter := router.Group("v1/user")
+	{
+		userRouter.POST("/register", controllers.UserRegister)
+		userRouter.POST("/login", controllers.UserLogin)
+	}
 	})
 
-	userRouter := router.Group("/v1/bank/account")
+	bankAccountRouter := router.Group("/v1/bank/account")
 	{
-		userRouter.POST("/", middleware.BankAccountValidator(), controllers.CreateBankAccount)
+		bankAccountRouter.POST("/", middleware.BankAccountValidator(), controllers.CreateBankAccount)
 	}
 
 	router.GET("/health-check", controllers.ServerCheck)
