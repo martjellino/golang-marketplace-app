@@ -1,20 +1,20 @@
 package router
 
 import (
-	"database/sql"
 	"golang-marketplace-app/controllers"
 	middleware "golang-marketplace-app/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-func StartApp(db *sql.DB) *gin.Engine {
+func StartApp() *gin.Engine {
 	router := gin.Default()
 
-	router.Use(func(c *gin.Context) {
-		c.Set("db", db)
-		c.Next()
-	})
+	userRouter := router.Group("v1/user")
+	{
+		userRouter.POST("/register", controllers.UserRegister)
+		userRouter.POST("/login", controllers.UserLogin)
+	}
 
 	bankAccountRouter := router.Group("/v1/bank/account")
 	{
