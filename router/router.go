@@ -28,6 +28,16 @@ func StartApp() *gin.Engine {
 		productRouter.GET("/:id", controllers.GetProductByID)
 	}
 
+	productManagementRouter := router.Group("v1/product")
+	{
+		// productManagementRouter.POST("/", controllers.CreateProduct)
+		// productManagementRouter.PATCH("/:productId", controllers.UpdateProductByProductId)
+		productManagementRouter.DELETE("/:productId", controllers.DeleteProductByProductId) //TODO: not implement middleware  yet
+
+		// productManagementRouter.GET("/", controllers.ListProduct)
+		// productManagementRouter.GET("/:productId", controllers.DetailProductByProductId)
+	}
+
 	router.GET("/health-check", controllers.ServerCheck)
 
 	return router
