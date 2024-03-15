@@ -15,13 +15,17 @@ func StartApp() *gin.Engine {
 		userRouter.POST("/register", controllers.UserRegister)
 		userRouter.POST("/login", controllers.UserLogin)
 	}
-
 	bankAccountRouter := router.Group("/v1/bank/account")
 	{
 		bankAccountRouter.POST("/",  middleware.Authentication(), middleware.BankAccountValidator(), controllers.CreateBankAccount)
 		bankAccountRouter.GET("/", middleware.Authentication(), controllers.GetBankAccountByUserId)
 		bankAccountRouter.PATCH("/:accountId", middleware.Authentication(), middleware.BankAccountValidator(), controllers.UpdateBankAccountByAccountId)
 		bankAccountRouter.DELETE("/:accountId", middleware.Authentication(), controllers.DeleteBankAccountByAccountId)
+	}
+	productRouter := router.Group("v1/product")
+	{
+		productRouter.GET("/", controllers.GetProducts)
+		productRouter.GET("/:id", controllers.GetProductByID)
 	}
 
 	productManagementRouter := router.Group("v1/product")

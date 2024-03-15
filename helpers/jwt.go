@@ -11,10 +11,10 @@ import (
 
 var secretKey = "your-256-bit-secret"
 
-func GenerateToken(id int, email string) (string, error) {
+func GenerateToken(id int, username string) (string, error) {
 	claims := jwt.MapClaims{
 		"id":    id,
-		"email": email,
+		"username": username,
 		"exp":   time.Now().Add(time.Minute * 10), // expire in 10 minutes
 		// "exp":   time.Now().Add(time.Minute * 2), // expire in 2 minutes for testing in weekend
 	}

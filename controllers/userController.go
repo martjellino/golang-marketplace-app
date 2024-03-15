@@ -12,14 +12,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var (
-	// appJSON = "application/json"
-	DB *sql.DB
-)
-
 func UserRegister(ctx *gin.Context) {
 	var user models.Users
-
+	
 	contentType := helpers.GetContentType(ctx)
 
 	if contentType == "application/json" {
@@ -63,6 +58,7 @@ func UserRegister(ctx *gin.Context) {
 func UserLogin(ctx *gin.Context) {
 	var user models.Users
 	var password string
+	db := database.GetDB()
 	contentType := helpers.GetContentType(ctx)
 
 	if contentType == "application/json" {
@@ -74,7 +70,7 @@ func UserLogin(ctx *gin.Context) {
 	password = user.Password
 
 	// Retrieve user from the database based on the provided username
-	err := database.DB.QueryRow("SELECT user_id, username, password, fullname FROM users WHERE username = $1", user.Username).
+	err := db.QueryRow("SELECT user_id, username, password, fullname FROM users WHERE username = $1", user.Username).
 		Scan(&user.UserID, &user.Username, &user.Password, &user.Fullname)
 	if err == sql.ErrNoRows {
 		ctx.JSON(http.StatusNotFound, gin.H{
@@ -125,7 +121,8 @@ func UserLogin(ctx *gin.Context) {
 
 // SaveUserToDatabase saves the user data to the database
 func SaveUserToDatabase(user *models.Users) error {
-	_, err := database.DB.Exec("INSERT INTO users (username, password, fullname, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)", user.Username, user.Password, user.Fullname, user.CreatedAt, user.UpdatedAt)
+	db := database.GetDB()
+	_, err := db.Exec("INSERT INTO users (username, password, fullname, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)", user.Username, user.Password, user.Fullname, user.CreatedAt, user.UpdatedAt)
 	fmt.Println(user.Username)
 	fmt.Println(user.Password)
 	fmt.Println(user.Fullname)
@@ -138,12 +135,13 @@ func SaveUserToDatabase(user *models.Users) error {
 }
 
 func isUserExists(username string) bool {
+	db := database.GetDB()
 	// Prepare SQL query to check if the username exists
 	query := "SELECT EXISTS (SELECT 1 FROM users WHERE username = $1)"
 
 	// Execute the query
 	var exists bool
-	err := database.DB.QueryRow(query, username).Scan(&exists)
+	err := db.QueryRow(query, username).Scan(&exists)
 	if err != nil {
 		// Handle the error, log it, etc.
 		// For simplicity, let's assume the user does not exist in case of an error
