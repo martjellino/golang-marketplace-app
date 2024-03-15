@@ -22,11 +22,6 @@ func StartApp() *gin.Engine {
 		bankAccountRouter.PATCH("/:accountId", middleware.Authentication(), middleware.BankAccountValidator(), controllers.UpdateBankAccountByAccountId)
 		bankAccountRouter.DELETE("/:accountId", middleware.Authentication(), controllers.DeleteBankAccountByAccountId)
 	}
-	productRouter := router.Group("v1/product")
-	{
-		productRouter.GET("/", controllers.GetProducts)
-		productRouter.GET("/:id", controllers.GetProductByID)
-	}
 
 	productManagementRouter := router.Group("v1/product")
 	{
@@ -34,8 +29,8 @@ func StartApp() *gin.Engine {
 		// productManagementRouter.PATCH("/:productId", controllers.UpdateProductByProductId)
 		productManagementRouter.DELETE("/:productId", controllers.DeleteProductByProductId) //TODO: not implement middleware  yet
 
-		// productManagementRouter.GET("/", controllers.ListProduct)
-		// productManagementRouter.GET("/:productId", controllers.DetailProductByProductId)
+		productManagementRouter.GET("/", controllers.ListProduct)
+		productManagementRouter.GET("/:productId", controllers.DetailProductByProductId)
 	}
 
 	router.GET("/health-check", controllers.ServerCheck)
