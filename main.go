@@ -13,6 +13,6 @@ var (
 
 func main() {
 	database.StartDB()
-	r := router.StartApp(DB)
+	r := router.StartApp()
 	r.Run(PORT)
 }
