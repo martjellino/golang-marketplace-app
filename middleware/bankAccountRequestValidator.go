@@ -23,7 +23,7 @@ func BankAccountValidator() gin.HandlerFunc {
 
 			context.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 				"error":   errors,
-				"message": "Data Not Found",
+				"message": "Failed to validate",
 			})
 			return
 		}
