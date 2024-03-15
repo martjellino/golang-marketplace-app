@@ -9,7 +9,7 @@ type Users struct {
 	UserID    int       `json:"user_id"`
 	Username  string    `json:"username" binding:"min=5,max=15" validate:"min=5,max=15"`
 	Password  string    `json:"password" binding:"min=5,max=15" validate:"min=5,max=15"`
-	Fullname  string    `json:"fullname,omitempty" binding:"omitempty,min=5,max=50" validate:"omitempty,min=5,max=50"`
+	Fullname  string    `json:"fullname" binding:"min=5,max=50" validate:"min=5,max=50"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
