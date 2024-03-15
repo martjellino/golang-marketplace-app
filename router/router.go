@@ -16,11 +16,20 @@ func StartApp(db *sql.DB) *gin.Engine {
 		userRouter.POST("/register", controllers.UserRegister)
 		userRouter.POST("/login", controllers.UserLogin)
 	}
-	})
 
 	bankAccountRouter := router.Group("/v1/bank/account")
 	{
 		bankAccountRouter.POST("/", middleware.BankAccountValidator(), controllers.CreateBankAccount)
+	}
+
+	productManagementRouter := router.Group("v1/product")
+	{
+		// productManagementRouter.POST("/", controllers.CreateProduct)
+		// productManagementRouter.PATCH("/:productId", controllers.UpdateProductByProductId)
+		productManagementRouter.DELETE("/:productId", controllers.DeleteProductByProductId) //TODO: not implement middleware  yet
+
+		// productManagementRouter.GET("/", controllers.ListProduct)
+		// productManagementRouter.GET("/:productId", controllers.DetailProductByProductId)
 	}
 
 	router.GET("/health-check", controllers.ServerCheck)

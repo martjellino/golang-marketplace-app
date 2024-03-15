@@ -20,8 +20,8 @@ func StartDB() {
         log.Fatal("Error loading .env file")
     }
 
-    host := os.Getenv("HOST")
-    user := os.Getenv("DB_USER")
+    host := os.Getenv("DB_HOST")
+    user := os.Getenv("DB_USERNAME")
     password := os.Getenv("DB_PASSWORD")
     port := os.Getenv("DB_PORT")
     dbname := os.Getenv("DB_NAME")
