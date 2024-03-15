@@ -30,8 +30,8 @@ func UserRegister(ctx *gin.Context) {
 	}
 
 	// Validate password and username length
-	if len(user.Password) < 5 || len(user.Password) > 15 || len(user.Username) < 5 || len(user.Username) > 15 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Password/Username length should be between 5 and 15 characters"})
+	if len(user.Password) < 5 || len(user.Password) > 15 || len(user.Username) < 5 || len(user.Username) > 15 || len(user.Fullname) < 5 || len(user.Fullname) > 15 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Password/Username/FullName length should be between 5 and 15 characters"})
 		return
 	}
 
