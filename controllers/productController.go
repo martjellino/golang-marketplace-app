@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetProducts(ctx *gin.Context) {
+func ListProduct(ctx *gin.Context) {
 	db := database.GetDB()
 	pageSize := 10
 	pageNum, _ := strconv.Atoi(ctx.Param("pageNum"))
@@ -132,11 +132,11 @@ func getTagsForProduct(productID int) ([]models.Tags, error) {
 	return tags, nil
 }
 
-func GetProductByID(ctx *gin.Context) {
+func DetailProductByProductId(ctx *gin.Context) {
 	db := database.GetDB()
 
 	// Retrieve product ID from request parameters
-	id, err := strconv.Atoi(ctx.Param("id"))
+	productId, err := strconv.Atoi(ctx.Param("productId"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
@@ -147,7 +147,7 @@ func GetProductByID(ctx *gin.Context) {
 
 	// Query the database to fetch the product details
 	var product models.Products
-	err = db.QueryRow("SELECT product_id, seller_id, name, price, image_url, stock, condition, is_purchaseable, created_at, updated_at FROM products WHERE product_id = $1", id).
+	err = db.QueryRow("SELECT product_id, seller_id, name, price, image_url, stock, condition, is_purchaseable, created_at, updated_at FROM products WHERE product_id = $1", productId).
 		Scan(
 			&product.ProductID,
 			&product.SellerID,
@@ -177,7 +177,7 @@ func GetProductByID(ctx *gin.Context) {
 	}
 
 	// Retrieve tags for the current product
-	tags, err := getTagsForProduct(id)
+	tags, err := getTagsForProduct(productId)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Internal Server Error",
