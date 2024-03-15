@@ -8,7 +8,7 @@ import (
 
 var (
 	PORT = ":8000"
-    DB  *sql.DB
+  DB  *sql.DB
 )
 
 func main() {
