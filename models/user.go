@@ -15,15 +15,20 @@ type Users struct {
 }
 
 // HashPassword hashes the password before creating the user
-func (u *Users) HashPassword() {
+func (u *Users) HashPassword() error {
 	// Hash the password using a hashing function like bcrypt
-	u.Password = helpers.HashPassword(u.Password)
+	hashedPassword, err := helpers.HashPassword(u.Password)
+	if err != nil {
+		return err
+	}
+	u.Password = hashedPassword
+	return nil
 }
 
 // BeforeCreateUser is a function to be called before creating a new user
 func BeforeCreateUser(user *Users) {
-    // Perform any pre-create logic here
-    user.CreatedAt = time.Now()
-    user.UpdatedAt = time.Now()
-    user.HashPassword()
+	// Perform any pre-create logic here
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+	user.HashPassword()
 }
