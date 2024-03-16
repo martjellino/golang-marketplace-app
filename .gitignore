@@ -61,3 +61,4 @@ _testmain.go
 *.tiff
 *.webp
 *.svg
+*.pem
