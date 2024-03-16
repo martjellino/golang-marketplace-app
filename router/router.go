@@ -34,6 +34,10 @@ func StartApp() *gin.Engine {
 	{
 		paymentRouter.POST("/:productId/buy", middleware.Authentication(), middleware.PaymentValidator(), controllers.CreatePaymentToAProductId)
 	}
+	imageUploadRouter := router.Group("/v1/image")
+	{
+		imageUploadRouter.POST("/", middleware.Authentication(), controllers.CreateUploadImage)
+	}
 
 	router.GET("/health-check", controllers.ServerCheck)
 
