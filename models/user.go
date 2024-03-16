@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/go-playground/validator/v10"
 	"golang-marketplace-app/helpers"
 	"time"
 )
@@ -31,4 +32,9 @@ func BeforeCreateUser(user *Users) {
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
 	user.HashPassword()
+}
+
+func ValidateUser(user *Users) error {
+	validate := validator.New()
+	return validate.Struct(user)
 }
