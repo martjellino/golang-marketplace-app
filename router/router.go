@@ -20,7 +20,8 @@ func StartApp() *gin.Engine {
 	{
 		bankAccountRouter.POST("/account", middleware.Authentication(), middleware.BankAccountValidator(), controllers.CreateBankAccount)
 		bankAccountRouter.GET("/account", middleware.Authentication(), controllers.GetBankAccountByUserId)
-		bankAccountRouter.PATCH("/account/:accountId", middleware.Authentication(), middleware.BankAccountValidator(), controllers.UpdateBankAccountByAccountId)
+		bankAccountRouter.PATCH("/account", middleware.Authentication(), middleware.BankAccountPatchValidator(), controllers.UpdateBankAccountByAccountId)
+		bankAccountRouter.PATCH("/account/:accountId", middleware.Authentication(), middleware.BankAccountPatchValidator(), controllers.UpdateBankAccountByAccountId)
 		bankAccountRouter.DELETE("/account/:accountId", middleware.Authentication(), controllers.DeleteBankAccountByAccountId)
 	}
 
