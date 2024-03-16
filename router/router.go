@@ -22,20 +22,21 @@ func StartApp() *gin.Engine {
 		bankAccountRouter.PATCH("/:accountId", middleware.Authentication(), middleware.BankAccountValidator(), controllers.UpdateBankAccountByAccountId)
 		bankAccountRouter.DELETE("/:accountId", middleware.Authentication(), controllers.DeleteBankAccountByAccountId)
 	}
-
 	productManagementRouter := router.Group("v1/product")
 	{
-		// productManagementRouter.POST("/", controllers.CreateProduct)
-		// productManagementRouter.PATCH("/:productId", controllers.UpdateProductByProductId)
-		productManagementRouter.DELETE("/:productId", controllers.DeleteProductByProductId) //TODO: not implement middleware  yet
-
-		productManagementRouter.GET("/", controllers.ListProduct)
-		productManagementRouter.GET("/:productId", controllers.DetailProductByProductId)
+		productManagementRouter.POST("/", middleware.Authentication(), middleware.ProductValidator(), controllers.CreateProduct)
+		productManagementRouter.PATCH("/:productId", middleware.Authentication(), middleware.ProductUpdateValidator(), controllers.UpdateProductByProductId)
+		productManagementRouter.DELETE("/:productId", middleware.Authentication(), controllers.DeleteProductByProductId)
+		productManagementRouter.POST("/:productId/stock", middleware.Authentication(), middleware.ProductStockValidator(), controllers.UpdateStockProductByProductId)
 	}
 
 	paymentRouter := router.Group("/v1/product")
 	{
 		paymentRouter.POST("/:productId/buy", middleware.Authentication(), middleware.PaymentValidator(), controllers.CreatePaymentToAProductId)
+	}
+	imageUploadRouter := router.Group("/v1/image")
+	{
+		imageUploadRouter.POST("/", middleware.Authentication(), controllers.CreateUploadImage)
 	}
 
 	router.GET("/health-check", controllers.ServerCheck)

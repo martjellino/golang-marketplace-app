@@ -1,4 +1,4 @@
-package bankaccount
+package productmanage
 
 import "time"
 
@@ -10,7 +10,13 @@ type ProductManagementResponse struct {
 	ImageUrl       string    `json:"image_url"`
 	Stock          int       `json:"stock"`
 	Condition      string    `json:"condition"`
-	IsPurchaseable bool      `json:"is_purchaseable"`
+	Tags		   []string  `json:"tags"`
+	IsPurchasable  bool      `json:"is_purchaseable"`
 	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
+type ProductStockManagementResponse struct {
+	Stock          int       `json:"stock"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
