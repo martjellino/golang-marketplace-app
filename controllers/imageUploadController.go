@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	// "fmt"
+	"mime/multipart"
 	"net/http"
 	"os"
-	"strings"
+	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -12,71 +12,66 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/olahol/go-imageupload"
 )
 
 func CreateUploadImage(ctx *gin.Context) {
-	contentType := ctx.GetHeader("Content-Type")
-	// fmt.Println(contentType)
-	if !strings.HasPrefix(contentType, "multipart/form-data") {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Content-Type must be multipart/form-data"})
+	form, fileErr := ctx.MultipartForm()
+
+	if fileErr != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to process multipart form"})
 		return
 	}
 
-	// Process uploaded image
-	img, err := imageupload.Process(ctx.Request, "file")
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to process uploaded image"})
+
+	files := form.File["file"]
+	if len(files) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "No file uploaded"})
 		return
 	}
 
-	// Check file size
-	if img.Size > 2*1024*1024 || img.Size < 10*1024 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Uploaded file size must be between 10KB and 2MB"})
+	file := files[0]
+	if file.Size <= 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Uploaded file is empty"})
 		return
 	}
 
 	// Check file extension
-	if !strings.HasSuffix(strings.ToLower(img.Filename), ".jpg") && !strings.HasSuffix(strings.ToLower(img.Filename), ".jpeg") {
+	ext := filepath.Ext(file.Filename)
+	if ext != ".jpg" && ext != ".jpeg" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Uploaded file must be in *.jpg or *.jpeg format"})
 		return
 	}
 
+	// Check file size
+	if file.Size > 2*1024*1024 || file.Size < 10*1024 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Uploaded file size must be between 10KB and 2MB"})
+		return
+	}
+
 	// Generate filename
-	filename := uuid.New().String() + ".jpeg"
+	filename := uuid.New().String() + ext
 
-	dir, err := os.Getwd()
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "GETWD error"})
-		return
-	}
-	// fmt.Println(dir)
-
-	// Save image
-	err = img.Save(dir + "/uploads/" + filename)
-	// fmt.Println(err)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save uploaded image"})
+	uploadError := uploadToS3(file)
+	if uploadError != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file to AWS S3"})
 		return
 	}
 
-	// Upload image to AWS S3
-	err = uploadToS3(dir+"/uploads/"+filename, filename)
-	// fmt.Println(err)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload image to AWS S3"})
-		return
-	}
+	// Construct file URL
+	fileURL := "https://s3.amazonaws.com/" + os.Getenv("S3_BUCKET_NAME") + "/" + filename
 
-	// Construct image URL
-	imageURL := "https://s3.amazonaws.com/" + os.Getenv("S3_BUCKET_NAME") + "/" + filename
-
-	// Respond with image URL
-	ctx.JSON(http.StatusOK, gin.H{"imageUrl": imageURL})
+	// Respond with file URL
+	ctx.JSON(http.StatusOK, gin.H{"imageUrl": fileURL})
 }
 
 // Uploads file to AWS S3
-func uploadToS3(filePath, filename string) error {
+func uploadToS3(file *multipart.FileHeader) error {
+	fileContent, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer fileContent.Close()
+
 	// Create AWS session
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("ap-southeast-1"),
@@ -89,20 +84,14 @@ func uploadToS3(filePath, filename string) error {
 	// Create S3 service client
 	svc := s3.New(sess)
 
-	// Open the file
-	file, err := os.Open(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
 	// Upload file to S3
 	_, err = svc.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(os.Getenv("S3_BUCKET_NAME")),
-		Key:    aws.String(filename),
+		Key:    aws.String(file.Filename),
 		ACL:    aws.String("public-read"),
-		Body:   file,
+		Body:   fileContent,
 	})
+
 	if err != nil {
 		return err
 	}
