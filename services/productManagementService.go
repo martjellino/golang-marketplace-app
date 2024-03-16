@@ -10,7 +10,6 @@ import (
 )
 
 func CreateProduct(userId int, Request productmanage.ProductManagementRequest) (productmanage.ProductManagementResponse, error) {
-	fmt.Println("Request:", Request)//
 	stmt, err := database.DB.Prepare("INSERT INTO products (seller_id, name, price, image_url, stock, condition, is_purchaseable) VALUES ($1, $2, $3, $4, $5, $6, $7)")
 	if err != nil {
 			log.Println("Error preparing SQL query:", err)
@@ -84,14 +83,12 @@ func UpdateProductByProductId(productID int, Request productmanage.ProductUpdate
 	stmt, err := database.DB.Prepare("UPDATE products SET name=$1, price=$2, image_url=$3, condition=$4, is_purchaseable=$5, updated_at=$6 WHERE product_id=$7")
 
 	if err != nil {
-		fmt.Println("Error preparing SQL query:", err)
 		return productmanage.ProductManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(Request.Name, Request.Price, Request.ImageUrl, Request.Condition, Request.IsPurchaseable, time.Now(), productID)
 	if err != nil {
-		fmt.Println("Error executing update product statement:", err)
 		return productmanage.ProductManagementResponse{}, fmt.Errorf("error executing update product statement: %v", err)
 	}
 
@@ -123,7 +120,6 @@ func FindProductByProductId(productID int) (productmanage.ProductManagementRespo
 	)
 
 	query := fmt.Sprintf("SELECT product_id, seller_id, name, price, image_url, stock, condition, is_purchaseable, created_at, updated_at FROM products WHERE product_id = %d", productID)
-	fmt.Println("Query:", query)
 
 	err := database.DB.QueryRow(query).Scan(&parsedProductId, &sellerID, &name, &price, &imageUrl, &stock, &condition, &isPurchaseable, &createdAt, &updatedAt)
 	if err != nil {
@@ -160,14 +156,12 @@ func DeleteProductByProductId(productID int) error {
 func UpdateStockProductByProductId(productID int, Request productmanage.ProductStockUpdateRequest) (productmanage.ProductStockManagementResponse, error) {
 	stmt, err := database.DB.Prepare("UPDATE products SET stock=$1, updated_at=$2 WHERE product_id=$3")
 	if err != nil {
-			fmt.Println("Error preparing SQL query:", err)
 			return productmanage.ProductStockManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(Request.Stock, time.Now(), productID)
 	if err != nil {
-			fmt.Println("Error executing update stock statement:", err)
 			return productmanage.ProductStockManagementResponse{}, fmt.Errorf("error executing update stock statement: %v", err)
 	}
 	

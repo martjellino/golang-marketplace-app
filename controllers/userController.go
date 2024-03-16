@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"database/sql"
-	"fmt"
 	"golang-marketplace-app/database"
 	"golang-marketplace-app/helpers"
 	"golang-marketplace-app/models"
@@ -147,12 +146,8 @@ func UserLogin(ctx *gin.Context) {
 func SaveUserToDatabase(user *models.Users) error {
 	db := database.GetDB()
 	_, err := db.Exec("INSERT INTO users (username, password, fullname, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)", user.Username, user.Password, user.Fullname, user.CreatedAt, user.UpdatedAt)
-	fmt.Println(user.Username)
-	fmt.Println(user.Password)
-	fmt.Println(user.Fullname)
 
 	if err != nil {
-		fmt.Println("Error inserting user into database:", err)
 		return err
 	}
 	return nil

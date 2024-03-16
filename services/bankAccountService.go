@@ -78,7 +78,6 @@ func FindBankAccountByAccountId(accountId int) (bankaccount.BankAccountResponse,
 	)
 
 	query := fmt.Sprintf("SELECT account_id, user_id, bank_name, account_name, account_number, created_at, updated_at FROM bank_accounts WHERE account_id = %d", accountId)
-	fmt.Println("Query:", query)
 
 	err := database.DB.QueryRow(query).Scan(&parsedAccountId, &userId, &bankName, &accountName, &accountNumber, &createdAt, &updatedAt)
 	if err != nil {
