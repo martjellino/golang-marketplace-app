@@ -5,7 +5,9 @@ import (
 	"golang-marketplace-app/models/payment"
 	"golang-marketplace-app/services"
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	jwt5 "github.com/golang-jwt/jwt/v5"
@@ -36,6 +38,28 @@ func CreatePaymentToAProductId(context *gin.Context) {
 			"message": "Failed to cast productId to int",
 		})
 		return
+	}
+
+	parsedURL, parsedUrlError := url.ParseRequestURI(Request.PaymentProofImageUrl)
+	if parsedUrlError != nil || parsedURL.Scheme == "" || parsedURL.Host == "" {
+			context.JSON(http.StatusBadRequest, gin.H{
+					"message": "ImageUrl should be a valid URL with scheme and host",
+			})
+			return
+	}
+	
+	if parsedURL.Host != "s3.amazonaws.com" {
+			context.JSON(http.StatusBadRequest, gin.H{
+					"message": "ImageUrl should be hosted on Amazon S3",
+			})
+			return
+	}
+	
+	if !strings.HasPrefix(parsedURL.Path, "/sprint-bucket-public-read/") {
+			context.JSON(http.StatusBadRequest, gin.H{
+					"message": "ImageUrl path should start with '/sprint-bucket-public-read/'",
+			})
+			return
 	}
 
 	userData := context.MustGet("userData").(jwt5.MapClaims)
