@@ -124,21 +124,22 @@ func DeleteProductByProductId(productID int) error {
 	return nil
 }
 
-func UpdateStockProductByProductId(productID int, Request productmanage.ProductStockUpdateRequest) (productmanage.ProductManagementResponse, error) {
+func UpdateStockProductByProductId(productID int, Request productmanage.ProductStockUpdateRequest) (productmanage.ProductStockManagementResponse, error) {
 	stmt, err := database.DB.Prepare("UPDATE products SET stock=$1, updated_at=$2 WHERE product_id=$3")
 	if err != nil {
 			fmt.Println("Error preparing SQL query:", err)
-			return productmanage.ProductManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
+			return productmanage.ProductStockManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(Request.Stock, time.Now(), productID)
 	if err != nil {
 			fmt.Println("Error executing update stock statement:", err)
-			return productmanage.ProductManagementResponse{}, fmt.Errorf("error executing update stock statement: %v", err)
+			return productmanage.ProductStockManagementResponse{}, fmt.Errorf("error executing update stock statement: %v", err)
 	}
 	
-	return productmanage.ProductManagementResponse{
+	return productmanage.ProductStockManagementResponse{
 		Stock: Request.Stock,
+		UpdatedAt: time.Now(),
 	}, nil
 }

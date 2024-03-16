@@ -14,3 +14,8 @@ type ProductManagementResponse struct {
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
+
+type ProductStockManagementResponse struct {
+	Stock          int       `json:"stock"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
