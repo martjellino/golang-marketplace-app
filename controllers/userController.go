@@ -14,7 +14,7 @@ import (
 
 func UserRegister(ctx *gin.Context) {
 	var user models.Users
-	
+
 	contentType := helpers.GetContentType(ctx)
 
 	if contentType == "application/json" {
@@ -44,12 +44,23 @@ func UserRegister(ctx *gin.Context) {
 		return
 	}
 
+	// Generate JWT token
+	token, err := helpers.GenerateToken(user.UserID, user.Username)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Internal Server Error",
+			"message": "Failed to generate token",
+		})
+		return
+	}
+
 	// Construct response data
 	responseData := gin.H{
 		"message": "User registered successfully",
 		"data": gin.H{
 			"username": user.Username,
 			"name":     user.Fullname,
+			"accessToken": token,
 		},
 	}
 	ctx.JSON(http.StatusCreated, responseData)
@@ -87,24 +98,24 @@ func UserLogin(ctx *gin.Context) {
 	}
 
 	// Compare password
-    comparePass := helpers.ComparePassword([]byte(user.Password), []byte(password))
-    if !comparePass {
-        ctx.JSON(http.StatusBadRequest, gin.H{
-            "error":   "Bad Request",
-            "message": "Invalid password",
-        })
-        return
-    }
+	comparePass := helpers.ComparePassword([]byte(user.Password), []byte(password))
+	if !comparePass {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Bad Request",
+			"message": "Invalid password",
+		})
+		return
+	}
 
 	// Generate JWT token
-    token, err := helpers.GenerateToken(user.UserID, user.Username)
-    if err != nil {
-        ctx.JSON(http.StatusInternalServerError, gin.H{
-            "error":   "Internal Server Error",
-            "message": "Failed to generate token",
-        })
-        return
-    }
+	token, err := helpers.GenerateToken(user.UserID, user.Username)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Internal Server Error",
+			"message": "Failed to generate token",
+		})
+		return
+	}
 
 	// Construct response data
 	responseData := gin.H{
