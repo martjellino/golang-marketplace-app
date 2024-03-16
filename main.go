@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"golang-marketplace-app/database"
 	"golang-marketplace-app/router"
+
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -12,6 +14,7 @@ var (
 )
 
 func main() {
+	gin.SetMode(gin.ReleaseMode)
 	database.StartDB()
 	r := router.StartApp()
 	r.Run(PORT)
