@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"errors"
+	"os"
 	"strings"
 	"time"
 
@@ -9,13 +10,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var secretKey = "your-256-bit-secret"
+var secretKey = os.Getenv("JWT_SECRET")
 
 func GenerateToken(id int, username string) (string, error) {
 	claims := jwt.MapClaims{
-		"id":    id,
+		"id":       id,
 		"username": username,
-		"exp":   time.Now().Add(time.Minute * 10), // expire in 10 minutes
+		"exp":      time.Now().Add(time.Minute * 10), // expire in 10 minutes
 		// "exp":   time.Now().Add(time.Minute * 2), // expire in 2 minutes for testing in weekend
 	}
 
