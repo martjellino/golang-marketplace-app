@@ -13,14 +13,21 @@ import (
 )
 
 func UserRegister(ctx *gin.Context) {
-	var user models.Users
 
-	contentType := helpers.GetContentType(ctx)
+	requestInterface, ok := ctx.Get("request")
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Parsed data not found in context",
+		})
+		return
+	}
 
-	if contentType == "application/json" {
-		ctx.ShouldBindJSON(&user)
-	} else {
-		ctx.ShouldBind(&user)
+	user, ok := requestInterface.(models.Users)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to cast request connection to *bankaccount.BankAccountRequest",
+		})
+		return
 	}
 
 	// Check if username already exists

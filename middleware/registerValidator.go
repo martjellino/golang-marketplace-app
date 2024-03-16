@@ -8,11 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthValidator() gin.HandlerFunc {
+func RegisterValidator() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		var loginRequest models.UserRequest
+		var user models.Users
 
-		if payloadValidationError := context.ShouldBindJSON(&loginRequest); payloadValidationError != nil {
+		if payloadValidationError := context.ShouldBindJSON(&user); payloadValidationError != nil {
 			var errors []string
 
 			if payloadValidationError.Error() == "EOF" {
@@ -28,7 +28,7 @@ func AuthValidator() gin.HandlerFunc {
 			return
 		}
 
-		context.Set("request", loginRequest)
+		context.Set("request", user)
 		context.Next()
 	}
 }
