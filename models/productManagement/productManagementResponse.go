@@ -10,7 +10,7 @@ type ProductManagementResponse struct {
 	ImageUrl       string    `json:"image_url"`
 	Stock          int       `json:"stock"`
 	Condition      string    `json:"condition"`
-	IsPurchaseable bool      `json:"is_purchaseable"`
+	IsPurchasable  bool      `json:"is_purchaseable"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }

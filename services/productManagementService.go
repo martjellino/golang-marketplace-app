@@ -9,6 +9,47 @@ import (
 	"time"
 )
 
+func CreateProduct(userId int, Request bankaccount.ProductManagementRequest) (bankaccount.ProductManagementResponse, error) {
+	fmt.Println("Request:", Request)//
+	stmt, err := database.DB.Prepare("INSERT INTO products (seller_id, name, price, image_url, stock, condition, is_purchaseable) VALUES ($1, $2, $3, $4, $5, $6, $7)")
+
+	if err != nil {
+			log.Println("Error preparing SQL query:", err)
+			return bankaccount.ProductManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userId, Request.Name, Request.Price, Request.ImageUrl, Request.Stock, Request.Condition, Request.IsPurchaseable)
+	if err != nil {
+			log.Println("Error executing insert statement:", err)
+			return bankaccount.ProductManagementResponse{}, fmt.Errorf("error executing insert statement: %v", err)
+	}
+
+	var productID int
+	err = database.DB.QueryRow("SELECT LASTVAL()").Scan(&productID)
+	if err != nil {
+			log.Println("Error retrieving last inserted ID:", err)
+			return bankaccount.ProductManagementResponse{}, fmt.Errorf("error retrieving last inserted ID: %v", err)
+	}
+
+	parsedProductID := strconv.Itoa(productID)
+	parsedUserId := strconv.Itoa(userId)
+
+	return bankaccount.ProductManagementResponse {
+		ProductID: parsedProductID,
+		Name: Request.Name,
+		Price: Request.Price,
+		ImageUrl: Request.ImageUrl,
+		Stock: Request.Stock,
+		Condition: Request.Condition,
+		// Tags: Request.Tags,
+		IsPurchasable: Request.IsPurchaseable,
+		SellerID: parsedUserId,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}, nil;
+}
+
 func FindProductByProductId(productID int) (bankaccount.ProductManagementResponse, error) {
 	var (
 			parsedProductId int
@@ -24,12 +65,12 @@ func FindProductByProductId(productID int) (bankaccount.ProductManagementRespons
 	)
 
 	query := fmt.Sprintf("SELECT product_id, seller_id, name, price, image_url, stock, condition, is_purchaseable, created_at, updated_at FROM products WHERE product_id = %d", productID)
-	fmt.Println("Query:", query) //
+	fmt.Println("Query:", query)
 
 	err := database.DB.QueryRow(query).Scan(&parsedProductId, &sellerID, &name, &price, &imageUrl, &stock, &condition, &isPurchaseable, &createdAt, &updatedAt)
 	if err != nil {
 			log.Println(err)
-			return bankaccount.ProductManagementResponse{}, fmt.Errorf("error retrieving product details: %v", err) //
+			return bankaccount.ProductManagementResponse{}, fmt.Errorf("error retrieving bank account details: %v", err)
 	}
 
 	return bankaccount.ProductManagementResponse{
@@ -40,7 +81,7 @@ func FindProductByProductId(productID int) (bankaccount.ProductManagementRespons
 		ImageUrl:       	imageUrl,
 		Stock:		   		stock,
 		Condition:			condition,
-		IsPurchaseable:     isPurchaseable,
+		IsPurchasable:     	isPurchaseable,
 		CreatedAt:     		createdAt,
 		UpdatedAt:     		updatedAt,
 	}, nil
@@ -52,7 +93,7 @@ func DeleteProductByProductId(productID int) error {
 	_, err := database.DB.Exec(query, productID)
 	if err != nil {
 		log.Println(err)
-		return fmt.Errorf("error deleting product: %v", err) //
+		return fmt.Errorf("error deleting product: %v", err)
 	}
 
 	return nil

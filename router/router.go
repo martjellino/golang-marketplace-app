@@ -22,15 +22,12 @@ func StartApp() *gin.Engine {
 		bankAccountRouter.PATCH("/:accountId", middleware.Authentication(), middleware.BankAccountValidator(), controllers.UpdateBankAccountByAccountId)
 		bankAccountRouter.DELETE("/:accountId", middleware.Authentication(), controllers.DeleteBankAccountByAccountId)
 	}
-
 	productManagementRouter := router.Group("v1/product")
 	{
-		// productManagementRouter.POST("/", controllers.CreateProduct)
+		productManagementRouter.POST("/", middleware.Authentication(), middleware.ProductValidator(), controllers.CreateProduct)
 		// productManagementRouter.PATCH("/:productId", controllers.UpdateProductByProductId)
-		productManagementRouter.DELETE("/:productId", controllers.DeleteProductByProductId) //TODO: not implement middleware  yet
-
-		productManagementRouter.GET("/", controllers.ListProduct)
-		productManagementRouter.GET("/:productId", controllers.DetailProductByProductId)
+		productManagementRouter.DELETE("/:productId", middleware.Authentication(), controllers.DeleteProductByProductId)
+		// productManagementRouter.POST("/:productId/stock", middleware.Authentication(), controllers.UpdateStockProductByProductId)
 	}
 
 	paymentRouter := router.Group("/v1/product")
