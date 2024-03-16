@@ -23,7 +23,9 @@ func StartApp() *gin.Engine {
 		bankAccountRouter.DELETE("/:accountId", middleware.Authentication(), controllers.DeleteBankAccountByAccountId)
 	}
 	productManagementRouter := router.Group("v1/product")
-	{
+	{	
+		productManagementRouter.GET("/", controllers.ListProduct)
+		productManagementRouter.GET("/:productId", controllers.DetailProductByProductId)
 		productManagementRouter.POST("/", middleware.Authentication(), middleware.ProductValidator(), controllers.CreateProduct)
 		productManagementRouter.PATCH("/:productId", middleware.Authentication(), middleware.ProductUpdateValidator(), controllers.UpdateProductByProductId)
 		productManagementRouter.DELETE("/:productId", middleware.Authentication(), controllers.DeleteProductByProductId)
