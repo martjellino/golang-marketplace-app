@@ -5,7 +5,6 @@ import (
 	"golang-marketplace-app/services"
 	"net/http"
 	"strconv"
-	"log"
 	jwt5 "github.com/golang-jwt/jwt/v5"
 
 	"github.com/gin-gonic/gin"
@@ -24,15 +23,6 @@ func CreateProduct(context *gin.Context) {
 	if !ok {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to cast request to *productmanage.ProductManagementRequest",
-		})
-		return
-	}
-
-	JwtPayload, ok := context.Get("userData")
-	log.Println(JwtPayload)
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Parsed user data not found in context",
 		})
 		return
 	}
@@ -92,6 +82,16 @@ func UpdateProductByProductId(context *gin.Context) {
 		return
 	}
 
+	userData := context.MustGet("userData").(jwt5.MapClaims)
+	userID := int(userData["id"].(float64))
+
+	if ExistingProduct.SellerID != strconv.Itoa(userID) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "Forbidden",
+		})
+		return
+	}
+
 	var UpdatedProduct, updateError = services.UpdateProductByProductId(productId, Request)
 	if updateError != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
@@ -124,6 +124,16 @@ func DeleteProductByProductId(context *gin.Context) {
 		} else {
 			context.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch Product"})
 		}
+		return
+	}
+
+	userData := context.MustGet("userData").(jwt5.MapClaims)
+	userID := int(userData["id"].(float64))
+
+	if ExistingProduct.SellerID != strconv.Itoa(userID) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "Forbidden",
+		})
 		return
 	}
 
@@ -174,6 +184,16 @@ func UpdateStockProductByProductId(context *gin.Context) {
 		} else {
 			context.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch product"})
 		}
+		return
+	}
+
+	userData := context.MustGet("userData").(jwt5.MapClaims)
+	userID := int(userData["id"].(float64))
+
+	if ExistingProduct.SellerID != strconv.Itoa(userID) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "Forbidden",
+		})
 		return
 	}
 
