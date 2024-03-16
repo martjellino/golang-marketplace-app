@@ -3,23 +3,29 @@ package middleware
 import (
 	"golang-marketplace-app/helpers"
 	"golang-marketplace-app/models/bankAccount"
-	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func BankAccountValidator() gin.HandlerFunc {
+func BankAccountPatchValidator() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		var bankAccountRequest bankaccount.BankAccountRequest
 
-		accountIdParam := context.Param("accountId")
-		log.Println("parameters", accountIdParam)
-
 		if payloadValidationError := context.ShouldBindJSON(&bankAccountRequest); payloadValidationError != nil {
 			var errors []string
-
-			if payloadValidationError.Error() == "EOF" {
+			
+			accountIdParam := context.Param("accountId")
+			_, parseError := strconv.Atoi(accountIdParam)
+			if parseError != nil {
+				errors = append(errors, "Path is invalid")
+				context.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+					"error":   errors,
+					"message": "Failed to validate",
+				})
+				return
+			}  else if payloadValidationError.Error() == "EOF" {
 				errors = append(errors, "Request body is missing")
 			} else {
 				errors = helpers.GeneralValidator(payloadValidationError)

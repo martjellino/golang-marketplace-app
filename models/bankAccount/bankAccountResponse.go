@@ -3,11 +3,11 @@ package bankaccount
 import "time"
 
 type BankAccountResponse struct {
-	AccountID     string    `json:"account_id"`
+	AccountID     string    `json:"bankAccountId"`
 	UserID        string    `json:"user_id,omitempty"`
-	BankName      string    `json:"bank_name"`
-	AccountName   string    `json:"account_name"`
-	AccountNumber string    `json:"account_number"`
+	BankName      string    `json:"bankName"`
+	AccountName   string    `json:"bankAccountName"`
+	AccountNumber string    `json:"bankAccountNumber"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
