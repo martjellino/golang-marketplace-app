@@ -13,7 +13,7 @@ func StartApp() *gin.Engine {
 	userRouter := router.Group("v1/user")
 	{
 		userRouter.POST("/register", controllers.UserRegister)
-		userRouter.POST("/login", controllers.UserLogin)
+		userRouter.POST("/login", middleware.AuthValidator(), controllers.UserLogin)
 	}
 
 	bankAccountRouter := router.Group("/v1/bank/account")
