@@ -13,14 +13,21 @@ import (
 )
 
 func UserRegister(ctx *gin.Context) {
-	var user models.Users
 
-	contentType := helpers.GetContentType(ctx)
+	requestInterface, ok := ctx.Get("request")
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Parsed data not found in context",
+		})
+		return
+	}
 
-	if contentType == "application/json" {
-		ctx.ShouldBindJSON(&user)
-	} else {
-		ctx.ShouldBind(&user)
+	user, ok := requestInterface.(models.Users)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to cast request connection to *bankaccount.BankAccountRequest",
+		})
+		return
 	}
 
 	// Check if username already exists
@@ -68,20 +75,26 @@ func UserRegister(ctx *gin.Context) {
 
 func UserLogin(ctx *gin.Context) {
 	var user models.Users
-	var password string
 	db := database.GetDB()
-	contentType := helpers.GetContentType(ctx)
 
-	if contentType == "application/json" {
-		ctx.ShouldBindJSON(&user)
-	} else {
-		ctx.ShouldBind(&user)
+	requestInterface, ok := ctx.Get("request")
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Parsed data not found in context",
+		})
+		return
 	}
 
-	password = user.Password
+	Request, ok := requestInterface.(models.UserRequest)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to cast request connection to *bankaccount.BankAccountRequest",
+		})
+		return
+	}
 
 	// Retrieve user from the database based on the provided username
-	err := db.QueryRow("SELECT user_id, username, password, fullname FROM users WHERE username = $1", user.Username).
+	err := db.QueryRow("SELECT user_id, username, password, fullname FROM users WHERE username = $1", Request.Username).
 		Scan(&user.UserID, &user.Username, &user.Password, &user.Fullname)
 	if err == sql.ErrNoRows {
 		ctx.JSON(http.StatusNotFound, gin.H{
@@ -98,7 +111,7 @@ func UserLogin(ctx *gin.Context) {
 	}
 
 	// Compare password
-	comparePass := helpers.ComparePassword([]byte(user.Password), []byte(password))
+	comparePass := helpers.ComparePassword([]byte(user.Password), []byte(Request.Password))
 	if !comparePass {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error":   "Bad Request",
