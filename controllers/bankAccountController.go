@@ -3,7 +3,6 @@ package controllers
 import (
 	bankaccount "golang-marketplace-app/models/bankAccount"
 	"golang-marketplace-app/services"
-	"log"
 	"net/http"
 	"strconv"
 	jwt5 "github.com/golang-jwt/jwt/v5"
@@ -24,15 +23,6 @@ func CreateBankAccount(context *gin.Context) {
 	if !ok {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to cast request to *bankaccount.BankAccountRequest",
-		})
-		return
-	}
-
-	JwtPayload, ok := context.Get("userData")
-	log.Println(JwtPayload)
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Parsed user data not found in context",
 		})
 		return
 	}
@@ -139,15 +129,6 @@ func DeleteBankAccountByAccountId(context *gin.Context) {
 }
 
 func GetBankAccountByUserId(context *gin.Context) {
-	JwtPayload, ok := context.Get("userData")
-	log.Println(JwtPayload)
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Parsed user data not found in context",
-		})
-		return
-	}
-
 	userData := context.MustGet("userData").(jwt5.MapClaims)
 	userID := int(userData["id"].(float64))
 
