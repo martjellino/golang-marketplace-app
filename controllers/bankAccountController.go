@@ -91,6 +91,16 @@ func UpdateBankAccountByAccountId(context *gin.Context) {
 		return
 	}
 
+	userData := context.MustGet("userData").(jwt5.MapClaims)
+	userID := int(userData["id"].(float64))
+
+	if ExistingBankAccount.UserID != strconv.Itoa(userID) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "Forbidden",
+		})
+		return
+	}
+
 	var UpdatedBankAccount, updateError = services.UpdateBankAccountByAccountId(accountId, Request)
 	if updateError != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
@@ -126,6 +136,16 @@ func DeleteBankAccountByAccountId(context *gin.Context) {
 		return
 	}
 
+	userData := context.MustGet("userData").(jwt5.MapClaims)
+	userID := int(userData["id"].(float64))
+
+	if ExistingBankAccount.UserID != strconv.Itoa(userID) {
+		context.JSON(http.StatusForbidden, gin.H{
+			"message": "Forbidden",
+		})
+		return
+	}
+
 	var deleteError = services.DeleteBankAccountByAccountId(accountId)
 	if deleteError != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
@@ -139,15 +159,6 @@ func DeleteBankAccountByAccountId(context *gin.Context) {
 }
 
 func GetBankAccountByUserId(context *gin.Context) {
-	JwtPayload, ok := context.Get("userData")
-	log.Println(JwtPayload)
-	if !ok {
-		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Parsed user data not found in context",
-		})
-		return
-	}
-
 	userData := context.MustGet("userData").(jwt5.MapClaims)
 	userID := int(userData["id"].(float64))
 
