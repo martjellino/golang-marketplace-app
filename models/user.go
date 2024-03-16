@@ -15,6 +15,11 @@ type Users struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type UserRequest struct {
+	Username  string    `json:"username" binding:"min=5,max=15" validate:"min=5,max=15"`
+	Password  string    `json:"password" binding:"min=5,max=15" validate:"min=5,max=15"`
+}
+
 // HashPassword hashes the password before creating the user
 func (u *Users) HashPassword() error {
 	// Hash the password using a hashing function like bcrypt
