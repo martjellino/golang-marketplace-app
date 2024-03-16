@@ -22,7 +22,6 @@ func CreateProduct(userId int, Request productmanage.ProductManagementRequest) (
 			log.Println("Error executing insert statement:", err)
 			return productmanage.ProductManagementResponse{}, fmt.Errorf("error executing insert statement: %v", err)
 	}
-
 	var productID int
 	err = database.DB.QueryRow("SELECT LASTVAL()").Scan(&productID)
 	if err != nil {
@@ -32,6 +31,40 @@ func CreateProduct(userId int, Request productmanage.ProductManagementRequest) (
 	parsedProductID := strconv.Itoa(productID)
 	parsedUserId := strconv.Itoa(userId)
 
+	for _, tag := range Request.Tags {
+		// bulk insert
+		stmt2, err := database.DB.Prepare("INSERT INTO tags (tag_name) VALUES ($1)")
+		if err != nil {
+				log.Println("Error preparing SQL query:", err)
+				return productmanage.ProductManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
+		}
+		defer stmt2.Close()
+		_, err = stmt2.Exec(tag)
+		if err != nil {
+				log.Println("Error executing insert statement:", err)
+				return productmanage.ProductManagementResponse{}, fmt.Errorf("error executing insert statement: %v", err)
+		}
+		var tagID int
+		err = database.DB.QueryRow("SELECT LASTVAL()").Scan(&tagID)
+		if err != nil {
+				log.Println("Error retrieving last inserted ID:", err)
+				return productmanage.ProductManagementResponse{}, fmt.Errorf("error retrieving last inserted ID: %v", err)
+		}
+		// parsedTagID := strconv.Itoa(tagID)
+
+		stmt3, err := database.DB.Prepare("INSERT INTO product_tags (product_id, tag_id) VALUES ($1, $2)")
+		if err != nil {
+				log.Println("Error preparing SQL query:", err)
+				return productmanage.ProductManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
+		}
+		defer stmt3.Close()
+		_, err = stmt3.Exec(productID, tagID)
+		if err != nil {
+				log.Println("Error executing insert statement:", err)
+				return productmanage.ProductManagementResponse{}, fmt.Errorf("error executing insert statement: %v", err)
+		}
+	}
+
 	return productmanage.ProductManagementResponse {
 		ProductID: parsedProductID,
 		Name: Request.Name,
@@ -39,7 +72,7 @@ func CreateProduct(userId int, Request productmanage.ProductManagementRequest) (
 		ImageUrl: Request.ImageUrl,
 		Stock: Request.Stock,
 		Condition: Request.Condition,
-		// Tags: Request.Tags,
+		Tags: Request.Tags,
 		IsPurchasable: Request.IsPurchaseable,
 		SellerID: parsedUserId,
 		CreatedAt: time.Now(),
@@ -68,7 +101,7 @@ func UpdateProductByProductId(productID int, Request productmanage.ProductUpdate
 		Price: Request.Price,
 		ImageUrl: Request.ImageUrl,
 		Condition: Request.Condition,
-		// Tags: Request.Tags,
+		Tags: Request.Tags,
 		IsPurchasable: Request.IsPurchaseable,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
