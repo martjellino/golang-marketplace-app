@@ -3,39 +3,36 @@ package services
 import (
 	"fmt"
 	"golang-marketplace-app/database"
-	bankaccount "golang-marketplace-app/models/productManagement"  //TODO: update variable name
+	productmanage "golang-marketplace-app/models/productManagement"
 	"log"
 	"strconv"
 	"time"
 )
 
-func CreateProduct(userId int, Request bankaccount.ProductManagementRequest) (bankaccount.ProductManagementResponse, error) {
+func CreateProduct(userId int, Request productmanage.ProductManagementRequest) (productmanage.ProductManagementResponse, error) {
 	fmt.Println("Request:", Request)//
 	stmt, err := database.DB.Prepare("INSERT INTO products (seller_id, name, price, image_url, stock, condition, is_purchaseable) VALUES ($1, $2, $3, $4, $5, $6, $7)")
-
 	if err != nil {
 			log.Println("Error preparing SQL query:", err)
-			return bankaccount.ProductManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
+			return productmanage.ProductManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
 	}
 	defer stmt.Close()
-
 	_, err = stmt.Exec(userId, Request.Name, Request.Price, Request.ImageUrl, Request.Stock, Request.Condition, Request.IsPurchaseable)
 	if err != nil {
 			log.Println("Error executing insert statement:", err)
-			return bankaccount.ProductManagementResponse{}, fmt.Errorf("error executing insert statement: %v", err)
+			return productmanage.ProductManagementResponse{}, fmt.Errorf("error executing insert statement: %v", err)
 	}
 
 	var productID int
 	err = database.DB.QueryRow("SELECT LASTVAL()").Scan(&productID)
 	if err != nil {
 			log.Println("Error retrieving last inserted ID:", err)
-			return bankaccount.ProductManagementResponse{}, fmt.Errorf("error retrieving last inserted ID: %v", err)
+			return productmanage.ProductManagementResponse{}, fmt.Errorf("error retrieving last inserted ID: %v", err)
 	}
-
 	parsedProductID := strconv.Itoa(productID)
 	parsedUserId := strconv.Itoa(userId)
 
-	return bankaccount.ProductManagementResponse {
+	return productmanage.ProductManagementResponse {
 		ProductID: parsedProductID,
 		Name: Request.Name,
 		Price: Request.Price,
@@ -50,7 +47,35 @@ func CreateProduct(userId int, Request bankaccount.ProductManagementRequest) (ba
 	}, nil;
 }
 
-func FindProductByProductId(productID int) (bankaccount.ProductManagementResponse, error) {
+func UpdateProductByProductId(productID int, Request productmanage.ProductUpdateManagementRequest) (productmanage.ProductManagementResponse, error) {
+	stmt, err := database.DB.Prepare("UPDATE products SET name=$1, price=$2, image_url=$3, condition=$4, is_purchaseable=$5, updated_at=$6 WHERE product_id=$7")
+
+	if err != nil {
+		fmt.Println("Error preparing SQL query:", err)
+		return productmanage.ProductManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(Request.Name, Request.Price, Request.ImageUrl, Request.Condition, Request.IsPurchaseable, time.Now(), productID)
+	if err != nil {
+		fmt.Println("Error executing update product statement:", err)
+		return productmanage.ProductManagementResponse{}, fmt.Errorf("error executing update product statement: %v", err)
+	}
+
+	return productmanage.ProductManagementResponse{
+		ProductID: strconv.Itoa(productID),
+		Name: Request.Name,
+		Price: Request.Price,
+		ImageUrl: Request.ImageUrl,
+		Condition: Request.Condition,
+		// Tags: Request.Tags,
+		IsPurchasable: Request.IsPurchaseable,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}, nil
+}
+
+func FindProductByProductId(productID int) (productmanage.ProductManagementResponse, error) {
 	var (
 			parsedProductId int
 			sellerID        int
@@ -70,10 +95,10 @@ func FindProductByProductId(productID int) (bankaccount.ProductManagementRespons
 	err := database.DB.QueryRow(query).Scan(&parsedProductId, &sellerID, &name, &price, &imageUrl, &stock, &condition, &isPurchaseable, &createdAt, &updatedAt)
 	if err != nil {
 			log.Println(err)
-			return bankaccount.ProductManagementResponse{}, fmt.Errorf("error retrieving bank account details: %v", err)
+			return productmanage.ProductManagementResponse{}, fmt.Errorf("error retrieving bank account details: %v", err)
 	}
 
-	return bankaccount.ProductManagementResponse{
+	return productmanage.ProductManagementResponse{
 		ProductID:     		strconv.Itoa(parsedProductId),
 		SellerID:      		strconv.Itoa(sellerID),
 		Name:		   		name,
@@ -97,4 +122,23 @@ func DeleteProductByProductId(productID int) error {
 	}
 
 	return nil
+}
+
+func UpdateStockProductByProductId(productID int, Request productmanage.ProductStockUpdateRequest) (productmanage.ProductManagementResponse, error) {
+	stmt, err := database.DB.Prepare("UPDATE products SET stock=$1, updated_at=$2 WHERE product_id=$3")
+	if err != nil {
+			fmt.Println("Error preparing SQL query:", err)
+			return productmanage.ProductManagementResponse{}, fmt.Errorf("error preparing SQL query: %v", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(Request.Stock, time.Now(), productID)
+	if err != nil {
+			fmt.Println("Error executing update stock statement:", err)
+			return productmanage.ProductManagementResponse{}, fmt.Errorf("error executing update stock statement: %v", err)
+	}
+	
+	return productmanage.ProductManagementResponse{
+		Stock: Request.Stock,
+	}, nil
 }

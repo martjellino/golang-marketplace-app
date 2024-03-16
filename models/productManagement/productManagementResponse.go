@@ -1,4 +1,4 @@
-package bankaccount
+package productmanage
 
 import "time"
 

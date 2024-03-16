@@ -25,9 +25,9 @@ func StartApp() *gin.Engine {
 	productManagementRouter := router.Group("v1/product")
 	{
 		productManagementRouter.POST("/", middleware.Authentication(), middleware.ProductValidator(), controllers.CreateProduct)
-		// productManagementRouter.PATCH("/:productId", controllers.UpdateProductByProductId)
+		productManagementRouter.PATCH("/:productId", middleware.Authentication(), middleware.ProductUpdateValidator(), controllers.UpdateProductByProductId)
 		productManagementRouter.DELETE("/:productId", middleware.Authentication(), controllers.DeleteProductByProductId)
-		// productManagementRouter.POST("/:productId/stock", middleware.Authentication(), controllers.UpdateStockProductByProductId)
+		productManagementRouter.POST("/:productId/stock", middleware.Authentication(), middleware.ProductStockValidator(), controllers.UpdateStockProductByProductId)
 	}
 
 	paymentRouter := router.Group("/v1/product")
