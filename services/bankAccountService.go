@@ -10,6 +10,13 @@ import (
 )
 
 func CreateBankAccount(userId int, Request bankaccount.BankAccountRequest) (bankaccount.BankAccountResponse, error) {
+	var accountID int
+	err := database.DB.QueryRow("SELECT nextval('bank_accounts_account_id_seq')").Scan(&accountID)
+	if err != nil {
+			log.Println("Error retrieving next sequence value:", err)
+			return bankaccount.BankAccountResponse{}, fmt.Errorf("error retrieving next sequence value: %v", err)
+	}
+	
 	stmt, err := database.DB.Prepare("INSERT INTO bank_accounts (user_id, bank_name, account_name, account_number) VALUES ($1, $2, $3, $4)")
 	if err != nil {
 			log.Println("Error preparing SQL query:", err)
@@ -21,13 +28,6 @@ func CreateBankAccount(userId int, Request bankaccount.BankAccountRequest) (bank
 	if err != nil {
 			log.Println("Error executing insert statement:", err)
 			return bankaccount.BankAccountResponse{}, fmt.Errorf("error executing insert statement: %v", err)
-	}
-
-	var accountID int
-	err = database.DB.QueryRow("SELECT LASTVAL()").Scan(&accountID)
-	if err != nil {
-			log.Println("Error retrieving last inserted ID:", err)
-			return bankaccount.BankAccountResponse{}, fmt.Errorf("error retrieving last inserted ID: %v", err)
 	}
 
 	parsedAccountId := strconv.Itoa(accountID)

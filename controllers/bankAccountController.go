@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	bankaccount "golang-marketplace-app/models/bankAccount"
 	"golang-marketplace-app/services"
 	"net/http"
 	"strconv"
+
 	jwt5 "github.com/golang-jwt/jwt/v5"
 
 	"github.com/gin-gonic/gin"
@@ -33,7 +35,7 @@ func CreateBankAccount(context *gin.Context) {
 	var CreatedBankAccount, err = services.CreateBankAccount(userID, Request)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to create bank account",
+			"message": fmt.Sprintf("Failed to create bank account %s", err),
 		})
 		return
 	}
